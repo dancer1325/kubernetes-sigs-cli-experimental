@@ -70,35 +70,13 @@ application resource is just another resource.
 
 ## apply
 
-The verb _apply_ in the context of k8s refers to a
-kubectl command and an in-progress [API
-endpoint](https://goo.gl/UbCRuf) for mutating a
-cluster.
-
-One _applies_ a statement of what one wants to a
-cluster in the form of a complete resource list.
-
-The cluster merges this with the previously applied
-state and the actual state to arrive at a new desired
-state, which the cluster's reconciliation loop attempts
-to create.  This is the foundation of level-based state
-management in k8s.
+* == kubectl command / mutate a cluster
+* == k8s' foundation of level-based state management 
 
 ## base
 
-A _base_ is a [kustomization] referred to
-by some other [kustomization].
-
-Any kustomization, including an [overlay], can be a base to
-another kustomization.
-
-A base has no knowledge of the overlays that refer to it.
-
-For simple [gitops] management, a base configuration
-could be the _sole content of a git repository
-dedicated to that purpose_.  Same with [overlays].
-Changes in a repo could generate a build, test and
-deploy cycle.
+* == [kustomization] / referred to by some OTHER [kustomization]
+  * _Example:_ kustomization / includes an [overlay]
 
 ## bespoke configuration
 
@@ -148,8 +126,7 @@ In brief, kustomize should
 
 ## generator
 
-A generator makes resources that can be used as is,
-or fed into a [transformer].
+* == generator -- of -- NEW resources to create
 
 ## gitops
 
@@ -157,103 +134,76 @@ Devops or CICD workflows that use a git repository as a
 single source of truth and take action (e.g., build,
 test or deploy) when that truth changes.
 
-## kustomization
+## kustomization == `kustomization.yaml` 
 
-The term _kustomization_ refers to a
-`kustomization.yaml` file, or more generally to a
-directory (the [root]) containing the
-`kustomization.yaml` file and all the relative file
-paths that it immediately references (all the local
-data that doesn't require a URL specification).
+* ways to share it
+  * `kustomization.yaml`,
+  * tarball / contains the YAML + references
+  * git archive (ditto)
+  * URL -- to a -- git repo
 
-I.e. if someone gives you a _kustomization_ for use
-with [kustomize], it could be in the form of
-
-* one file called `kustomization.yaml`,
-* a tarball (containing that YAML file plus what it references),
-* a git archive (ditto),
-* a URL to a git repo (ditto), etc.
-
-A kustomization file contains [fields](fields.md)
-falling into four categories:
-
-* _resources_ - what existing [resources] are to be customized.
-   Example fields: _resources_, _crds_.
-
-* _generators_ - what _new_ resources should be created.
-   Example fields: _configMapGenerator_ (legacy),
-   _secretGenerator_ (legacy), _generators_ (v2.1).
-
-* _transformers_ - what to _do_ to the aforementioned resources.
-   Example fields: _namePrefix_, _nameSuffix_, _images_,
-   _commonLabels_, _patchesJson6902_, etc. and the more
-   general _transformers_ (v2.1) field.
-
-* _meta_ - fields which may influence all or some of
-   the above.  Example fields: _vars_, _namespace_,
-   _apiVersion_, _kind_, etc.
+* 's [fields](fields.md)
+  * categories
+    * [resources](#resource) 
+      * _Example:_ resources, crds
+    * [generators](#generator)
+      * _Example:_ configMapGenerator(legacy), secretGenerator(legacy), generators (v2.1).
+    * [transformers](#transformer)
+      * _Example fields:_ _namePrefix_, _nameSuffix_, _images_,
+         _commonLabels_, _patchesJson6902_, etc., _transformers_ (v2.1)
+    * meta
+      * == fields / -- may influence -- ALL or SOME PREVIOUS ones
+      * _Example:_ _vars_, _namespace_, _apiVersion_, _kind_, etc.
 
 ## kustomization root
 
-The directory that immediately contains a
-`kustomization.yaml` file.
+* := directory / IMMEDIATELY contains a `kustomization.yaml` + ALL relative files
 
-When a kustomization file is processed, it may or may
-not be able to access files outside its root.
+* data files
+  * must be | kustomization root
+  * _Example of data files:_ 
+    * resource YAML files,
+    * text files / contain _name=value_ pairs -- for a -- ConfigMap or Secret, 
+    * files / used | patch transformation
+  * -- are specified via -- relative paths
 
-Data files like resource YAML files, or text files
-containing _name=value_ pairs intended for a ConfigMap
-or Secret, or files representing a patch to be used in
-a patch transformation, must live _within or below_ the
-root, and as such are specified via _relative
-paths_ exclusively.
+* `--load_restrictions none`
+  * == special flag /
+    * relax this security feature
+    * enable a patch file -- to be shared by -- >1 kustomization
 
-A special flag (in v2.1), `--load_restrictions none`,
-is provided to relax this security feature, to, say,
-allow a patch file to be shared by more than one
-kustomization.
+* ways to refer OTHER kustomizations
+  * absolute path
+  * relative path
 
-Other kustomizations (other directories containing a
-`kustomization.yaml` file) may be referred to by URL, by
-absolute path, or by relative path.
+* if kustomization __A__ -- depends on -- kustomization __B__ ->
+  * ❌ __B__ may NOT _contain_ __A__ ❌
+  * ❌__B__ may NOT _depend on_ __A__ ❌
 
-If kustomization __A__ depends on kustomization __B__, then
+* if __A__ contains __B__ -> recommended to
+  * __A__ -- directly depends on -- __B__'s resources
+  * eliminate __B__'s "kustomization.yaml"
+    * == absorb __B__ | __A__
 
-* __B__ may not _contain_ __A__.
-* __B__ may not _depend on_ __A__, even transitively.
+* COMMON layout
+    > ```
+    > ├── base
+    > │   ├── deployment.yaml
+    > │   ├── kustomization.yaml
+    > │   └── service.yaml
+    > └── overlays
+    >     ├── dev
+    >     │   ├── kustomization.yaml
+    >     │   └── patch.yaml
+    >     ├── prod
+    >     │   ├── kustomization.yaml
+    >     │   └── patch.yaml
+    >     └── staging
+    >         ├── kustomization.yaml
+    >         └── patch.yaml
+    > ```
 
-__A__ may contain __B__, but in this case it might be
-simplest to have __A__ directly depend on __B__'s
-resources and eliminate __B__'s kustomization.yaml file
-(i.e. absorb __B__ into __A__).
-
-Conventionally, __B__ is in a directory that's sibling
-to __A__, or __B__ is off in a completely independent
-git repository, referencable from any kustomization.
-
-A common layout is
-
-> ```
-> ├── base
-> │   ├── deployment.yaml
-> │   ├── kustomization.yaml
-> │   └── service.yaml
-> └── overlays
->     ├── dev
->     │   ├── kustomization.yaml
->     │   └── patch.yaml
->     ├── prod
->     │   ├── kustomization.yaml
->     │   └── patch.yaml
->     └── staging
->         ├── kustomization.yaml
->         └── patch.yaml
-> ```
-
-The three roots `dev`, `prod` and `staging`
-(presumably) all refer to the `base` root.  One would
-have to inspect the `kustomization.yaml` files to be
-sure.
+  * the roots `dev`, `prod` & `staging` -- refer to the -- `base` root
 
 ## kubernetes
 
@@ -276,16 +226,15 @@ more than one version).
 
 ## kustomize
 
-_kustomize_ is a command line tool supporting
-template-free, structured customization of declarative
-configuration targeted to k8s-style objects.
+* == CL tool / 
+  * support
+    * template-free,
+    * declarative configuration / 
+      * structured customization 
+      * -- target to -- k8s-style objects
+        * == understand API resources
 
-_Targeted to k8s means_ that kustomize has some
-understanding of API resources, k8s concepts like
-names, labels, namespaces, etc. and the semantics of
-resource patching.
-
-kustomize is an implementation of [DAM].
+* == [DAM]'s implementation 
 
 ## off-the-shelf configuration
 
@@ -312,40 +261,23 @@ own [overlays] to do further customization.
 
 ## overlay
 
-An _overlay_ is a kustomization that depends on
-another kustomization.
-
-The [kustomizations] an overlay refers to (via file
-path, URI or other method) are called [bases].
-
-An overlay is unusable without its bases.
-
-An overlay may act as a base to another overlay.
-
-Overlays make the most sense when there is _more than
-one_, because they create different [variants] of a
-common base - e.g.  _development_, _QA_, _staging_ and
-_production_ environment variants.
-
-These variants use the same overall resources, and vary
-in relatively simple ways, e.g. the number of replicas
-in a deployment, the CPU to a particular pod, the data
-source used in a ConfigMap, etc.
-
-One configures a cluster like this:
-
-> ```
->  kustomize build someapp/overlays/staging |\
->      kubectl apply -f -
->
->  kustomize build someapp/overlays/production |\
->      kubectl apply -f -
-> ```
-
-Usage of the base is implicit - the overlay's
-kustomization points to the base.
-
-See also [root].
+* := kustomization / -- depends on -- ANOTHER kustomization
+* requirements
+  * ⚠️its bases ⚠️
+    * OTHERWISE, it's unusable 
+* use cases
+  * \>1 overlays
+    * Reason: 🧠create base's DIFFERENT [variants] 🧠
+    * _Example:_ _development_, _QA_, _staging_ and
+_production_ environment variants
+* _Example:_ configures a cluster
+    ```
+    kustomize build someapp/overlays/staging |\
+      kubectl apply -f -
+    kustomize build someapp/overlays/production |\
+      kubectl apply -f -
+    ```
+  * implicitly use the base
 
 ## package
 
@@ -413,24 +345,15 @@ Details [here](../../../guides/extending_kustomize).
 
 ## resource
 
-A _resource_ in the context of a REST-ful API is the
-target object of an HTTP operation like _GET_, _PUT_ or
-_POST_.  k8s offers a REST-ful API surface to interact
-with clients.
+* | REST-ful API,
+  * == HTTP operation's target object
 
-A _resource_, in the context of a kustomization, is a
-[root] relative path to a [YAML] or [JSON] file
-describing a k8s API object, like a Deployment or a
-ConfigMap, or it's a path to a kustomization, or a URL
-that resolves to a kustomization.
-
-More generally, a resource can be any correct YAML file
-that [defines an object](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/#required-fields)
-with a _kind_ and a _metadata/name_ field.
+* | kustomization,
+  * == [root] relative path -- to a -- [YAML] OR [JSON] / describe a k8s API object
 
 ## root
 
-See [kustomization root][root].
+* [kustomization root][root]
 
 ## sub-target / sub-application / sub-package
 
@@ -439,25 +362,24 @@ A _sub-whatever_ is not a thing. There are only
 
 ## target
 
-The _target_ is the argument to `kustomize build`, e.g.:
-
-> ```
->  kustomize build $target
-> ```
-
-`$target` must be a path or a url to a [kustomization].
-
-The target contains, or refers to, all the information
-needed to create customized resources to send to the
-[apply] operation.
-
-A target can be a [base] or an [overlay].
+* == `kustomize build`'s argument
+    > ```
+    >  kustomize build $target
+    > ```
+* ALLOWED
+  * values
+    * [base] 
+    * [overlay]
+  * types 
+    * path -- to a -- [kustomization]
+    * url -- to a -- [kustomization]
 
 ## transformer
 
-A transformer can modify a resource, or merely
-visit it and collect information about it in the
-course of a `kustomize build`.
+* allows
+  * modifying a resource
+  * visiting a resource
+  * collecting information about the resource | `kustomize build`
 
 ## variant
 
