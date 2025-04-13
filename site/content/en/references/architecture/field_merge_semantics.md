@@ -7,21 +7,16 @@ description: >
   Dealing with Field Merges
 ---
 
-
-{{< alert color="success" title="TL;DR" >}}
-- Fields set and deleted from Resource Config are merged into Resources by Apply
-- If a Resource already exists, Apply updates the Resources by merging the local Resource Config into the remote Resources
-- Fields removed from the Resource Config will be deleted from the remote Resource
-{{< /alert >}}
+- Resource Config's fields set & deleted 
+  - -- are merged into -- Resources by Apply
+  - -- will be deleted from the -- remote Resource 
+- if a Resource ALREADY exists -- , merging local Resource Config | remote Resources, -- Apply updates the Resources 
 
 # Merging Fields
 
-{{< alert color="warning" title="Advanced Section" >}}
-This chapter contains advanced material that readers may want to skip and come back to later.
-{{< /alert >}}
-
 ## When are fields merged?
 
+* TODO:
 This page describes how Resource Config is merged with Resources or other Resource Config.  This
 may occur when:
 
