@@ -15,9 +15,9 @@ description: >
       * generate OR transform OTHER KRM objects 
 * kustomization file
   * := Kubernetes Resource Model ([KRM])'s YAML specification /
-    * order is
+    * ⚠️order is
       * relevant
-      * respected
+      * respected⚠️
   * _Example:_
     ```
     apiVersion: kustomize.config.k8s.io/v1beta1
@@ -47,7 +47,6 @@ description: >
         * effectively injected | encapsulating list
           * encapsulating list == _overlay_
           * referred to | encapsulating list == _base_
-
 * _Example:_ typical layout
     ```
     app1/
@@ -98,32 +97,33 @@ value (or increment) to use in the Deployment's `replicas` field.
 
 ### Ordering
 
-A build stage first processes `resources`, then it processes `generators`,
-adding to the resource list under consideration, then it processes
-`transformers` to modify the list, and finally runs `validators` to check the
-list for whatever error.
+* ⚠️build stage's process order ⚠️
+  * `resources`
+  * `generators`
+    * add resources | resource list
+  * `transformers`
+    * modify the resource list
+  * `validators`
+    * check the resource list
 
-### Conveniences
+### Recommendations
 
-The `resources` field is a convenience.  One can omit `resources`
-field and instead use a generator that accepts a file path list,
-expanding it as needed.  Such a generator would read the file system,
-doing the job that kustomize does when processing the `resources`
-field.
+* `resources`
+  * add it
+    * if you omit it -> use a generator / 
+      * accepts a file path list
+      * 's job == kustomize's job | process `resources`
 
-All the other fields in a kustomization file (`configMapGenerator`,
-`namePrefix`, `patches`, etc.) are conveniences as well, as they are
-shorthand for: run a particular generator or transformer with a
-particular configuration.
+* `configMapGenerator`, `namePrefix`, `patches`, etc.
+  * allows
+    * running a PARTICULAR generator or transformer --with a -- PARTICULAR configuration
 
-Likewise, a `validator` is just a transformer that doesn't transform,
-but can (just like a transformer) _fail the build_ with an error
-message.  Coding up a validator is identical to coding up a
-transformer. The only difference is in how it's used by kustomize;
-kustomize attempts to disallow validators from making changes.
-
-The next section explains why the `generators` field is also just a
-convenience.
+* `validator`
+  * == `transformer` / 
+    * NOT transform
+    * can fail the build -- with an -- error message
+  * 's coding up vs `transformer`'s coding up
+    * kustomize NOT disallow validators -- from -- making changes
 
 ### Generators and Transformers
 
