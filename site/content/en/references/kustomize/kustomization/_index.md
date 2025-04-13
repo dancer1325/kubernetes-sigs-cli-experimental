@@ -9,101 +9,89 @@ description: >
 
 [KRM]: https://github.com/kubernetes/design-proposals-archive/blob/main/architecture/resource-management.md
 
-The kustomization file is a YAML specification of a Kubernetes
-Resource Model ([KRM]) object called a _Kustomization_.
-A kustomization describes how to generate or transform
-other KRM objects.
+* Kustomization
+  * := Kubernetes Resource Model ([KRM])'s object / 
+    * describe how to
+      * generate OR transform OTHER KRM objects 
+* kustomization file
+  * := Kubernetes Resource Model ([KRM])'s YAML specification /
+    * order is
+      * relevant
+      * respected
+  * _Example:_
+    ```
+    apiVersion: kustomize.config.k8s.io/v1beta1
+    kind: Kustomization
+    
+    resources:
+    - {pathOrUrl}
+    - ...
+    
+    generators:
+    - {pathOrUrl}
+    - ...
+    
+    transformers:
+    - {pathOrUrl}
+    - ...
+    
+    validators:
+    - {pathOrUrl}
+    - ...
+    ```
+  * `{pathOrUrl}`' ALLOWED values
+    * file system path -- to a -- YAML _file_ / contain >=1 KRM objects
+    * _directory_ / contains a `kustomization.yaml`
+      * _Example:_ local or remote git repo
+      * -> 👀kustomization is RECURSIVELY built | flat list of KRM objects 👀/ 
+        * effectively injected | encapsulating list
+          * encapsulating list == _overlay_
+          * referred to | encapsulating list == _base_
 
-Although most practical kustomization files don't actually look this
-way, a `kustomization.yaml` file is basically four lists:
-
-```
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- {pathOrUrl}
-- ...
-
-generators:
-- {pathOrUrl}
-- ...
-
-transformers:
-- {pathOrUrl}
-- ...
-
-validators:
-- {pathOrUrl}
-- ...
-```
-
-The order in each of these lists is relevant
-and respected.
-
-> There are other fields too, e.g. `commonLabels`, `namePrefixes`,
-> `patches`, etc.  These fields are _convenience_ fields, shorthand for
-> longer transformer configuration stanzas, and are discussed later.
-> They're what's used most often, but it's useful to first cover
-> the fundamentals before discussing the conveniences.
-
-In all cases the `{pathOrUrl}` list entry can specify
-
- - a file system path to a YAML _file_ containing one or
-   more KRM objects, or
- - a _directory_ (local or in a remote git repo)
-   that contains a `kustomization.yaml` file.
-
-In the latter case, the kustomization is recursively built (aka
-_hydrated_) into a flat list of KRM objects that's effectively
-injected into the encapsulating list in order.  When this happens, the
-encapsulating kustomization can be called an _overlay_, and what it
-refers to can be called a _base_.
-
-A typical layout:
-
-```
-app1/
-  kustomization.yaml
-    | resources:
-    | - ../base
-    | patches:
-    | - patch1.yaml
-  patch1.yaml
-
-app2/
-  kustomization.yaml
-    | resources:
-    | - ../base
-    | patches:
-    | - patch2.yaml
-  patch2.yaml
-
-base/
-  kustomization.yaml
-    | resources:
-    | - deployment.yaml
-    | - configMap.yaml
-  deployment.yaml
-  configMap.yaml
-```
+* _Example:_ typical layout
+    ```
+    app1/
+      kustomization.yaml
+        | resources:
+        | - ../base
+        | patches:
+        | - patch1.yaml
+      patch1.yaml
+    
+    app2/
+      kustomization.yaml
+        | resources:
+        | - ../base
+        | patches:
+        | - patch2.yaml
+      patch2.yaml
+    
+    base/
+      kustomization.yaml
+        | resources:
+        | - deployment.yaml
+        | - configMap.yaml
+      deployment.yaml
+      configMap.yaml
+    ```
 
 [mainly useful]: https://github.com/kubernetes-sigs/kustomize/blob/master/api/krusty/inlinetransformer_test.go#L26
 
-Under `resources`, the result of reading KRM yaml files or executing
-recursive kustomizations becomes the list of _input objects_ to the
-current build stage.
+* `resources`
+  * == reading KRM yaml files' output OR executing recursive kustomizations' output
 
-Under `generators`, `transformers` and `validators`, the result of
-reading/hydrating is a list of KRM objects that _configure operations_
-that kustomize is expected to perform.
+* `generators`, `transformers` & `validators`
+  * == reading/hydrating's output
+  * == list of KRM objects / _configure operations_ -- expected to be performed by -- kustomize
 
+* TODO:
 > Some of these fields allow YAML inlining, allowing a KRM object to be
 > declared directly in the `kustomization.yaml` file (in practice this
 > is [mainly useful] in the `transformers` field).
 
 These configurations specify some executable (e.g. a plugin) along
-with that executable's _configuration_.  For example, a replica count
+with that executable's _configuration_.  
+For example, a replica count
 transformer's configuration must specify both an executable capable
 of parsing and modifying a _Deployment_, and the actual numerical
 value (or increment) to use in the Deployment's `replicas` field.
@@ -227,7 +215,6 @@ transformers:
   fieldSpecs:
   - path: metadata/name
 ```
-
 
 ### Transformed transformers
 
