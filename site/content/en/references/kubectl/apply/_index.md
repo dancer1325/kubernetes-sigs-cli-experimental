@@ -7,9 +7,11 @@ description: >
     Using apply Command
 ---
 
-## apply with `YAML files`
+## apply -- via -- `YAML files`
 
-Apply can be run directly against Resource Config files or directories using `-f`
+* can be applied to
+  * Resource Config files or
+  * directories
 
 ```yaml
 # deployment.yaml
@@ -30,18 +32,11 @@ spec:
 kubectl apply -f deployment.yaml
 ```
 
-This will apply the deployment file on the Kubernetes cluster. You can get the status by using a get command.
+## apply -- with -- `Kustomize files`
 
-```bash
-# Get deployments
-kubectl get deployments
-```
-
-## apply with `Kustomize files`
-
-Though Apply can be run directly against Resource Config files or directories using `-f`, it is recommended
-to run Apply against a `kustomization.yaml` using `-k`.  The `kustomization.yaml` allows users to define
-configuration that cuts across many Resources (e.g. namespace).
+* if you want to apply | 
+  * directories / contain `kustomization.yaml` -> recommended to use `-k`
+  * raw ResourceConfig files -> recommended to use `-f`
 
 ```yaml
 # kustomization.yaml
@@ -74,9 +69,6 @@ spec:
       - name: the-container
         image: registry/container:latest
 ```
-
-Users run Apply on directories containing `kustomization.yaml` files using `-k` or on raw
-ResourceConfig files using `-f`.
 
 ```bash
 # Apply the Resource Config
