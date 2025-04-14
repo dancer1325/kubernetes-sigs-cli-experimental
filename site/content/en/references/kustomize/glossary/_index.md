@@ -66,8 +66,10 @@ description: >
 
 ## base
 
-* == [kustomization] / referred to by some OTHER [kustomization]
+* == [kustomization] / referred to by some OTHER [kustomization] 
   * _Example:_ kustomization / includes an [overlay]
+* use case
+  * 👀COMMON | environments 👀
 
 ## bespoke configuration
 
@@ -259,8 +261,8 @@ own [overlays] to do further customization.
 * use cases
   * \>1 overlays
     * Reason: 🧠create base's DIFFERENT [variants] 🧠
-    * _Example:_ _development_, _QA_, _staging_ and
-_production_ environment variants
+      * 👀== environment-specific changes👀
+    * _Example:_ _development_, _QA_, _staging_ & _production_ environment variants
 * _Example:_ configures a cluster
     ```
     kustomize build someapp/overlays/staging |\
@@ -374,7 +376,12 @@ A _sub-whatever_ is not a thing. There are only
 
 ## variant
 
-* := | cluster, (apply [overlay] | [base])'s outcome
+* := | cluster, 
+  * (apply [overlay] | [base])'s outcome
+* allows
+  * avoid
+    * templating
+    * duplicating the manifests
 * _Example:_ _staging_ & _production_ overlay apply | COMMON base -> create DISTINCT variants
   * _staging_ variant use case
     * quality assurance testing
