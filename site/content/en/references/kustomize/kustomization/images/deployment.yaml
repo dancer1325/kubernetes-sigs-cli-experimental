@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: the-deployment
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    spec:
+      containers:
+        - name: mypostgresdb
+          image: postgres:8       # imageName:imageVersion
+        - name: nginxapp
+          image: nginx:1.7.9      # imageName:imageVersion
+        - name: myapp
+          image: my-demo-app:latest   # imageName:imageVersion
+        - name: alpine-app
+          image: alpine:3.7       # imageName:imageVersion
