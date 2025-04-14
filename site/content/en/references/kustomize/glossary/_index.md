@@ -53,20 +53,11 @@ description: >
 
 ## application
 
-An _application_ is a group of k8s resources related by
-some common purpose, e.g.  a load balancer in front of a
-webserver backed by a database.
-[Resource] labelling, naming and metadata schemes have
-historically served to group resources together for
-collective operations like _list_ and _remove_.
-
-This [proposal] describes a new k8s resource called
-_application_ to more formally describe this idea and
-provide support for application-level operations and
-dashboards.
-
-[kustomize] configures k8s resources, and the proposed
-application resource is just another resource.
+* := group of k8s resources / related by SOME COMMON purpose
+  * [proposal]
+* PREVIOUSLY
+  * [Resource] labelling, naming & metadata schemes
+    * group resources -- for -- collective operations
 
 ## apply
 
