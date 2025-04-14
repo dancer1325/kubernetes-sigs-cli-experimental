@@ -383,18 +383,9 @@ A _sub-whatever_ is not a thing. There are only
 
 ## variant
 
-A _variant_ is the outcome, in a cluster, of applying
-an [overlay] to a [base].
-
-E.g., a _staging_ and _production_ overlay both modify
-some common base to create distinct variants.
-
-The _staging_ variant is the set of resources exposed
-to quality assurance testing, or to some external users
-who'd like to see what the next version of production
-will look like.
-
-The _production_ variant is the set of resources
-exposed to production traffic, and thus may employ
-deployments with a large number of replicas and higher
-cpu and memory requests.
+* := | cluster, (apply [overlay] | [base])'s outcome
+* _Example:_ _staging_ & _production_ overlay apply | COMMON base -> create DISTINCT variants
+  * _staging_ variant use case
+    * quality assurance testing
+  * _production_ variant use case
+    * production traffic
