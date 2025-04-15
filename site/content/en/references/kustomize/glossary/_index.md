@@ -281,52 +281,35 @@ management tool in the tradition of, say, [apt] or
 
 ## patch
 
-General instructions to modify a resource.
-
-There are two alternative techniques with similar
-power but different notation - the
-[strategic merge patch](#patchstrategicmerge)
-and the [JSON patch](#patchjson6902).
+* := general instructions -- to modify a -- resource
+* EXISTING techniques
+  * [strategic merge patch](#patchstrategicmerge)
+  * [JSON patch](#patchjson6902)
 
 ## patchStrategicMerge
 
-A _patchStrategicMerge_ is [strategic-merge]-style patch (SMP).
-
-An SMP looks like an incomplete YAML specification of
-a k8s resource.  The SMP includes `TypeMeta`
-fields to establish the group/version/kind/name of the
-[resource] to patch, then just enough remaining fields
-to step into a nested structure to specify a new field
-value, e.g. an image tag.
-
-By default, an SMP _replaces_ values.  This is
-usually desired when the target value is a simple
-string, but may not be desired when the target
-value is a list.
-
-To change this
-default behavior, add a _directive_.  Recognized
-directives in YAML patches are _replace_ (the default)
-and _delete_ (see [these notes][strategic-merge]).
-
-Note that for custom resources, SMPs are treated as
-[json merge patches][JSONMergePatch].
-
-Fun fact - any resource file can be used as
-an SMP, overwriting matching fields in another
-resource with the same group/version/kind/name,
-but leaving all other fields as they were.
-
-TODO(monopole): add ptr to example.
+* == [strategic-merge]-style patch (SMP) /
+  * by default, replaces values
+  * 👀if you want to change the default behavior -> add a directive 👀
+    * EXISTING directives -- see [these notes][strategic-merge] --
+      * replace
+      * delete
+  * | custom resources,
+    * SMPs == [json merge patches][JSONMergePatch]
+* == k8s resource's incomplete YAML specification / 
+  * `TypeMeta` fields
+    * == [resource] to patch's group/version/kind/name + fields | nested structure / specify a NEW field
+value
+* use cases
+  * target value == simple string
+* ❌NOT use case ❌
+  * target value == list
 
 ## patchJson6902
 
-A _patchJson6902_ refers to a kubernetes [resource] and
-a [JSONPatch] specifying how to change the resource.
-
-A _patchJson6902_ can do almost everything a
-_patchStrategicMerge_ can do, but with a briefer
-syntax.  See this [example][patchExampleJson6902].
+* == kubernetes [resource] + [JSONPatch] / change the resource
+* allows
+  * doing ALMOST ALL done [patchStrategicMerge](#patchstrategicmerge) / briefer syntax 
 
 ## plugin
 
