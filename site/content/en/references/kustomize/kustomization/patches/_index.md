@@ -10,61 +10,39 @@ description: >
 [strategic merge]: /references/kustomize/glossary#patchstrategicmerge
 [JSON6902]: /references/kustomize/glossary#patchjson6902
 
-Patches (also called overlays) add or override fields on resources.  They are provided using the
-`patches` Kustomization field.
-
-The `patches` field contains a list of patches to be applied in the order they are specified.
-
-Each patch may:
-
-- be either a [strategic merge] patch, or a [JSON6902] patch
-- be either a file, or an inline string
-- target a single resource or multiple resources
-
-The patch target selects resources by `group`, `version`, `kind`, `name`, `namespace`, `labelSelector` and
-`annotationSelector`. Any resource which matches all the **specified** fields has the patch applied
-to it (regular expressions). 
-
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-patches:
-- path: patch.yaml
-  target:
-    group: apps
-    version: v1
-    kind: Deployment
-    name: deploy.*
-    labelSelector: "env=dev"
-    annotationSelector: "zone=west"
-- patch: |-
-    - op: replace
-      path: /some/existing/path
-      value: new value
-  target:
-    kind: MyKind
-    labelSelector: "env=dev"
-```
-
-The `name` and `namespace` fields of the patch target selector are
-automatically anchored regular expressions. This means that the value `myapp`
-is equivalent to `^myapp$`. 
+* `patches`
+  * == patches or overlays 
+  * allows
+    * add or override fields | resources
+  * == list of patches / 
+    * applied | specified order
+    * ALLOWED patch
+      - [strategic merge] patch OR [JSON6902] patch
+      - file OR inline string
+      - -- target -- >= 1 resources 
+        - -- by --
+          - `group`,
+          - `version`,
+          - `kind`,
+          - `name`,
+            - -- use -- regular expressions
+              - _Example:_ `myapp` == `^myapp$`
+          - `namespace`,
+            - -- use -- regular expressions
+            - _Example:_ `myapp` == `^myapp$`
+          - `labelSelector`
+          - `annotationSelector`
+        - ALL fields -- need to be -- matched
 
 ## Name and kind changes
 
+* TODO:
 With `patches` it is possible to override the kind or name of the resource it is
 editing with the options `allowNameChange` and `allowKindChange`. For example:
 ```yaml
-resources:
-- deployment.yaml
+
 patches:
-- path: patch.yaml
-  target:
-    kind: Deployment
-  options:
-    allowNameChange: true
-    allowKindChange: true
+
 ```
 By default, these fields are false and the patch will leave the kind and name of the resource untouched.
 
@@ -82,31 +60,6 @@ resource by its current name, original name, or any intermediate name that it ha
 
 ## Examples
 
-Consider the following `deployment.yaml` common for all examples:
-```yaml
-# deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dummy-app
-  labels:
-    app.kubernetes.io/name: nginx
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: nginx
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: nginx
-    spec:
-      containers:
-        - name: nginx
-          image: nginx:stable
-          ports:
-            - name: http
-              containerPort: 80
-```
 
 ### Intents
 
